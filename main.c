@@ -51,14 +51,14 @@ volatile uint8_t err = 0;
 
 //--------------------------------------------INTERUPTS--------------------------------------------------
 
-ISR(ADC_vect)
+ISR(ADC_vect) //ADC finished interupt
 {
 	button = ADC; //complete flag --> Data
 }
 
-ISR(USART_RX_vect)
+ISR(USART_RX_vect) //message recieved interupt
 {
-	if(UDR0 != '\r')
+	if(UDR0 != '\r') //end of message recieved
 	{
 		usartBuffer[indexUS] = UDR0;
 		indexUS++;
@@ -95,9 +95,9 @@ static FILE mystdout = FDEV_SETUP_STREAM(uart_putchar, NULL, _FDEV_SETUP_WRITE);
 //--------------------------------------------BUTTONS--------------------------------------------------
 //MOST LEFT BUTTON PRESET TIME TO LOCK/UNLOCK DOORS. PASSWORD IS REQUIRED
 
-void getButton()
+void getButton() //Get button press from LCD module (HD44780)
 {
-	if(button == 0)
+	if(button == 0) //Subtract 10second from preset time
 	{
 		if(presettingTime)
 		{
@@ -113,7 +113,7 @@ void getButton()
 			but_state = true;
 		}
 	}
-	else if(button >= 95 && button <= 105)
+	else if(button >= 95 && button <= 105) //Add 10seconds to preset time
 	{
 		if(presettingTime)
 		{
@@ -129,7 +129,7 @@ void getButton()
 			but_state = true;
 		}
 	}
-	else if(button >= 120 && button <= 140)
+	else if(button >= 120 && button <= 140) //Button to preset time (Sets time when doors are locked/unlocked automatically) - RTC module used
 	{
 		if(!but_state)
 		{
@@ -149,7 +149,7 @@ void getButton()
 			but_state = true;
 		}
 	}
-	else if(button >= 145 && button <= 160)
+	else if(button >= 145 && button <= 160) //Accepts preset time
 	{
 		if(!but_state)
 		{
@@ -162,7 +162,7 @@ void getButton()
 	}
 	
 	
-	if(presettingTime)
+	if(presettingTime) //Preset time mode
 	{
 		_delay_ms(30);
 		if(presetLock)
@@ -198,7 +198,7 @@ int main(void)
 	init_RTC_time();
 	while (1)
 	{
-		if(usart_new) // AU:12345 --> ADDS USER WITH PASSWORD 12345, ST:59381207160423 SETS TIME (sec, minute, hour, day in year (wont be printed), day, month, year)
+		if(usart_new) //User input: AU:12345 --> ADDS USER WITH PASSWORD 12345 TO EEPROM, ST:59381207160423 --> SETS TIME (sec, minute, hour, day in year (wont be printed), day, month, year), DU:12345 --> DELETES USER FROM EEPROM MEMORY, DAU --> DELETES ALL USERS
 		{
 			for(int i = 0; i < 16; i++)
 			{
@@ -248,9 +248,9 @@ int main(void)
 		
 		//---------------------KEYBOARD --> LCD--------------------------
 
-		ADC_start_conversion();
+		ADC_start_conversion(); //ADC conversion for LCD buttons
 		new_char = updateKeys();
-		if (new_char != memory_char) // * - INSERT PASSWORD, # - CLEARS LCD
+		if (new_char != memory_char) //Membrane keyboard, * - INSERT PASSWORD, # - CLEARS LCD
 		{
 			switch(new_char)
 			{
